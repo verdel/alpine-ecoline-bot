@@ -192,6 +192,7 @@ def make_apply_keyboard():
 
 
 def order_handler(bot, update):
+    bot.sendChatAction(update.callback_query.message.chat.id, action=ChatAction.TYPING)
     global ecoline
     ecoline = ecoline_auth(ecoline)
 
@@ -202,7 +203,6 @@ def order_handler(bot, update):
             reply_markup=make_date_keyboard()
         )
     elif update.callback_query.data == 'cancel':
-        bot.sendChatAction(update.callback_query.message.chat.id, action=ChatAction.TYPING)
         ecoline.clear_basket()
         bot.delete_message(
             message_id=update.callback_query.message.message_id,
@@ -210,7 +210,6 @@ def order_handler(bot, update):
         )
 
     elif re.match('^date:(\d+\.\d+\.\d+)', update.callback_query.data):
-        bot.sendChatAction(update.callback_query.message.chat.id, action=ChatAction.TYPING)
         date = re.search('^date:(\d+\.\d+\.\d+)', update.callback_query.data).group(1)
         order_properties['ORDER_PROP_6'] = date
         bot.editMessageText(
@@ -221,7 +220,6 @@ def order_handler(bot, update):
         )
 
     elif re.match('^time:CT[1-8]{1}', update.callback_query.data):
-        bot.sendChatAction(update.callback_query.message.chat.id, action=ChatAction.TYPING)
         time = {'CT1': '9.00-11.00',
                 'CT2': '11.00-13.00',
                 'CT3': '14.00-16.00',
@@ -269,7 +267,6 @@ def order_handler(bot, update):
                     )
 
     elif re.match('^pay:\d{1}', update.callback_query.data):
-        bot.sendChatAction(update.callback_query.message.chat.id, action=ChatAction.TYPING)
         pay_id = int(re.search('^pay:(\d{1})', update.callback_query.data).group(1))
         if pay_id == 1:
             order_properties['PAY_SYSTEM_ID'] = 1
@@ -289,7 +286,6 @@ def order_handler(bot, update):
             )
 
     elif update.callback_query.data == 'apply':
-        bot.sendChatAction(update.callback_query.message.chat.id, action=ChatAction.TYPING)
         try:
             # ecoline.checkout(order_properties)
             pass
