@@ -5,5 +5,5 @@ ecoline:
     username: {{ ECOLINE_USERNAME }}
     password: {{ ECOLINE_PASSWORD }}
     product:
-        name: {{ ECOLINE_PRODUCT }}
+        name: '{{ ECOLINE_PRODUCT }}'
         quantity: {{ ECOLINE_QUANTITY }}

@@ -5,7 +5,6 @@ COPY rootfs /
 
 RUN apk --no-cache --update add \
     bash \
-    openjdk8-jre \
     py-pip \
     && pip install --upgrade pip \
     && pip install -r /opt/ecoline-telegram-bot/requirements.txt \
