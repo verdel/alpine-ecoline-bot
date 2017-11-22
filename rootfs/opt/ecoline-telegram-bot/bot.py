@@ -87,7 +87,7 @@ def restricted(func):
 
 
 def sanitaize_time_periods(periods=None):
-    tm_sanitaize = False
+    tm_sanitaize = {}
     if isinstance(periods, dict):
         tm_sanitaize = {}
         now = int(datetime.now().hour)
@@ -106,22 +106,37 @@ def make_reply_keyboard():
 
 
 def make_date_keyboard():
-    today = datetime.today().date()
-    tomorrow = datetime.today().date() + timedelta(days=1)
+    tm = {'CT1': '9.00-11.00',
+          'CT2': '11.00-13.00',
+          'CT3': '14.00-16.00',
+          'CT4': '15.00-17.00',
+          'CT5': '16.00-18.00',
+          'CT6': '17.00-19.00',
+          'CT7': '18.00-20.00',
+          'CT8': '19.00-20.00'}
+    tm = sanitaize_time_periods(tm)
+    if not tm:
+        today = datetime.today().date() + timedelta(days=1)
+    else:
+        today = datetime.today().date()
 
     if today.isoweekday() > 5:
         first_date = today + timedelta(days=(8 - today.isoweekday()))
     else:
         first_date = today
 
-    if first_date == today:
+    if first_date == datetime.today().date():
         first_button = InlineKeyboardButton('Сегодня', callback_data='date:{}'.format(first_date.strftime('%d.%m.%Y')))
+
+    elif first_date == (datetime.today().date() + timedelta(days=1)):
+        first_button = InlineKeyboardButton('Завтра', callback_data='date:{}'.format(first_date.strftime('%d.%m.%Y')))
+
     else:
         first_button = InlineKeyboardButton(first_date.strftime('%d.%m.%Y'), callback_data='date:{}'.format(first_date.strftime('%d.%m.%Y')))
 
     second_date = first_date + timedelta(days=1)
 
-    if second_date == tomorrow:
+    if second_date == (datetime.today().date() + timedelta(days=1)):
         second_button = InlineKeyboardButton('Завтра', callback_data='date:{}'.format(second_date.strftime('%d.%m.%Y')))
     else:
         second_button = InlineKeyboardButton(second_date.strftime('%d.%m.%Y'), callback_data='date:{}'.format(second_date.strftime('%d.%m.%Y')))
