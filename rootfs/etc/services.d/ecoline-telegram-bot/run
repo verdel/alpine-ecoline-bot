@@ -1,0 +1,7 @@
+#!/usr/bin/with-contenv sh
+if [ -z "$ECOLINE_DEBUG" ]
+then
+    python /opt/ecoline-telegram-bot/bot.py --debug
+else
+    python /opt/ecoline-telegram-bot/bot.py
+fi

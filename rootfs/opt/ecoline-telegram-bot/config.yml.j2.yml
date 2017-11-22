@@ -1,0 +1,9 @@
+telegram:
+    token: {{ TELEGRAM_TOKEN }}
+    allow_user: {{ TELEGRAM_USER }}
+ecoline:
+    username: {{ ECOLINE_USERNAME }}
+    password: {{ ECOLINE_PASSWORD }}
+    product:
+        name: {{ ECOLINE_PRODUCT }}
+        quantity: {{ ECOLINE_QUANTITY }}

@@ -1,0 +1,4 @@
+requests>=2.0
+PyYAML
+beautifulsoup4
+python-telegram-bot
