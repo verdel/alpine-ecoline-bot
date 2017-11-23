@@ -36,6 +36,7 @@ def init_log(debug=None):
 
     logger = logging.getLogger('ecoline-telegram-bot')
     logger.setLevel(logging.DEBUG)
+
     # create console handler with a higher log level
     consolelog = logging.StreamHandler()
     consolelog.setLevel(consolelog_level)
@@ -106,15 +107,7 @@ def make_reply_keyboard():
 
 
 def make_date_keyboard():
-    tm = {'CT1': '9.00-11.00',
-          'CT2': '11.00-13.00',
-          'CT3': '14.00-16.00',
-          'CT4': '15.00-17.00',
-          'CT5': '16.00-18.00',
-          'CT6': '17.00-19.00',
-          'CT7': '18.00-20.00',
-          'CT8': '19.00-20.00'}
-    tm = sanitaize_time_periods(tm)
+    tm = sanitaize_time_periods(time_periods)
     if not tm:
         today = datetime.today().date() + timedelta(days=1)
     else:
@@ -147,17 +140,8 @@ def make_date_keyboard():
 
 
 def make_time_keyboard():
-    tm = {'CT1': '9.00-11.00',
-          'CT2': '11.00-13.00',
-          'CT3': '14.00-16.00',
-          'CT4': '15.00-17.00',
-          'CT5': '16.00-18.00',
-          'CT6': '17.00-19.00',
-          'CT7': '18.00-20.00',
-          'CT8': '19.00-20.00'}
-
     if datetime.today().date().strftime('%d.%m.%Y') == order_properties['ORDER_PROP_6']:
-        tm = sanitaize_time_periods(tm)
+        tm = sanitaize_time_periods(time_periods)
 
     time = OrderedDict(sorted(tm.items(), key=lambda t: t[0]))
 
@@ -220,14 +204,6 @@ def order_handler(bot, update):
         )
 
     elif re.match('^time:CT[1-8]{1}', update.callback_query.data):
-        time = {'CT1': '9.00-11.00',
-                'CT2': '11.00-13.00',
-                'CT3': '14.00-16.00',
-                'CT4': '15.00-17.00',
-                'CT5': '16.00-18.00',
-                'CT6': '17.00-19.00',
-                'CT7': '18.00-20.00',
-                'CT8': '19.00-20.00'}
         time_id = re.search('^time:(CT[1-8]{1})', update.callback_query.data).group(1)
         order_properties['ORDER_PROP_7'] = time_id
         try:
@@ -254,7 +230,7 @@ def order_handler(bot, update):
                 bot.editMessageText(
                     message_id=update.callback_query.message.message_id,
                     chat_id=update.callback_query.message.chat.id,
-                    text=update.callback_query.message.text + u'\r\nВремя доставки: {}\r\nОплата: Наличными'.format(time[time_id]),
+                    text=update.callback_query.message.text + u'\r\nВремя доставки: {}\r\nОплата: Наличными'.format(time_periods[time_id]),
                     reply_markup=make_apply_keyboard()
                 )
             else:
@@ -262,7 +238,7 @@ def order_handler(bot, update):
                     bot.editMessageText(
                         message_id=update.callback_query.message.message_id,
                         chat_id=update.callback_query.message.chat.id,
-                        text=update.callback_query.message.text + u'\r\nВремя доставки: {}'.format(time[time_id]),
+                        text=update.callback_query.message.text + u'\r\nВремя доставки: {}'.format(time_periods[time_id]),
                         reply_markup=make_pay_keyboard()
                     )
 
@@ -273,7 +249,7 @@ def order_handler(bot, update):
             bot.editMessageText(
                 message_id=update.callback_query.message.message_id,
                 chat_id=update.callback_query.message.chat.id,
-                text=update.callback_query.message.text + u'\r\nВремя доставки: {}\r\nОплата: Наличными'.format(time[time_id]),
+                text=update.callback_query.message.text + u'\r\nВремя доставки: {}\r\nОплата: Наличными'.format(time_periods[time_id]),
                 reply_markup=make_apply_keyboard()
             )
         elif pay_id == 2:
@@ -281,7 +257,7 @@ def order_handler(bot, update):
             bot.editMessageText(
                 message_id=update.callback_query.message.message_id,
                 chat_id=update.callback_query.message.chat.id,
-                text=update.callback_query.message.text + u'\r\nВремя доставки: {}\r\nОплата: Бонусами'.format(time[time_id]),
+                text=update.callback_query.message.text + u'\r\nВремя доставки: {}\r\nОплата: Бонусами'.format(time_periods[time_id]),
                 reply_markup=make_apply_keyboard()
             )
 
@@ -308,8 +284,29 @@ def order_handler(bot, update):
                 text=update.callback_query.message.text + u'\r\nСтатус заказа: {}'.format(emojize(':white_check_mark:', use_aliases=True)),
                 reply_markup=False
             )
-            logger.info('Order request from user {}, id {} complete success'.format(update.callback_query.from_user.username,
-                                                                                    update.callback_query.from_user.id))
+            try:
+                history = open(cfg['common']['history_path'], 'w')
+            except:
+                history = open('order.log', 'w')
+
+            date_now = datetime.today().date().strftime('%d.%m.%Y')
+            time_now = datetime.today().strftime('%H:%m:%S')
+            order_date = order_properties['ORDER_PROP_6']
+            order_time = time_periods[order_properties['ORDER_PROP_7']]
+            order_pay = 'Наличными' if order_properties['PAY_SYSTEM_ID'] == 1 else 'Бонусами'
+            history.write('{0};{1};{2};{3};{4};{5};{6}'.format(date_now,
+                                                               time_now,
+                                                               order_date,
+                                                               order_time,
+                                                               order_pay,
+                                                               update.callback_query.from_user.username,
+                                                               update.callback_query.from_user.id))
+            history.close()
+            logger.info(u'Order request: [Date: {0}, Time: {1}, Pay: {2}] from user {3}, id {4} complete success'.format(order_date,
+                                                                                                                         order_time,
+                                                                                                                         order_pay.decode('utf-8'),
+                                                                                                                         update.callback_query.from_user.username,
+                                                                                                                         update.callback_query.from_user.id))
 
 
 def message_handler(bot, update):
@@ -390,8 +387,20 @@ def history(bot, update):
         if orders_history:
             bot.sendMessage(
                 chat_id=update.message.chat_id,
-                text=u'Предыдущий заказ был сделан: {}\r\nПрошло дней: {}'.format(orders_history['date'], orders_history['diff'])
+                text=u'Информация с сайта:\r\nПредыдущий заказ был сделан: {}\r\nПрошло дней: {}'.format(orders_history['date'], orders_history['diff'])
             )
+            try:
+                history = open(cfg['common']['history_path'], 'r')
+            except:
+                history = open('order.log', 'r')
+            history_item = history.readline().split(';')
+            if history_item:
+                history_item.append((datetime.now() - datetime.strptime(history_item[0], '%d.%m.%Y')).days)
+                history_item[4] = history_item[4].decode('utf-8')
+                bot.sendMessage(
+                    chat_id=update.message.chat_id,
+                    text=u'Информация от бота:\r\nПредыдущий заказ был сделан: {} {}\r\nЗаказ на дату: {}\r\nЗаказ на время: {}\r\nОплата: {}\r\nПользователь: {} (id: {})\r\nПрошло дней: {}'''.format(*history_item)
+                )
             logger.info('History request from user {}, id {} complete success'.format(update.message.from_user.username,
                                                                                       update.message.from_user.id))
 
@@ -437,7 +446,21 @@ if __name__ == '__main__':
 
     cfg = get_config()
     ecoline = ecoline_auth(debug=args.debug)
-    order_properties = {'orderType': 'phiz', 'ORDER_DESCRIPTION': '', 'ORDER_PROP_9': 'Y', 'ORDER_PROP_10': 'sykt'}
+
+    # Ecoline site logic variables
+    order_properties = {'orderType': 'phiz',
+                        'ORDER_DESCRIPTION': '',
+                        'ORDER_PROP_9': 'Y',
+                        'ORDER_PROP_10': 'sykt'}
+
+    time_periods = {'CT1': '9.00-11.00',
+                    'CT2': '11.00-13.00',
+                    'CT3': '14.00-16.00',
+                    'CT4': '15.00-17.00',
+                    'CT5': '16.00-18.00',
+                    'CT6': '17.00-19.00',
+                    'CT7': '18.00-20.00',
+                    'CT8': '19.00-20.00'}
 
     updater = Updater(token=cfg['telegram']['token'])
     dp = updater.dispatcher
