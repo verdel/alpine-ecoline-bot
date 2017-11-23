@@ -5,7 +5,7 @@ ecoline:
     username: {{ ECOLINE_USERNAME }}
     password: {{ ECOLINE_PASSWORD }}
     product:
-        name: 'Краснозатонская Серебряная'
-        quantity: 2
+        name: '{{ ECOLINE_PRODUCT }}'
+        quantity: {{ ECOLINE_QUANTITY }}
 common:
     history_path: {{ ECOLINE_HISTORY_PATH }}
