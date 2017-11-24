@@ -412,7 +412,6 @@ def history(bot, update):
 def order(bot, update):
     history(bot, update)
     bot.sendChatAction(update.message.chat_id, action=ChatAction.TYPING)
-    history(bot, update)
     try:
         global ecoline
         ecoline = ecoline_auth(ecoline)
