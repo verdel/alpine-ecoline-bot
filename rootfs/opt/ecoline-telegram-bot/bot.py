@@ -129,6 +129,9 @@ def make_date_keyboard():
 
     second_date = first_date + timedelta(days=1)
 
+    if second_date.isoweekday() > 5:
+        second_date = second_date + timedelta(days=(8 - second_date.isoweekday()))
+
     if second_date == (datetime.today().date() + timedelta(days=1)):
         second_button = InlineKeyboardButton('Завтра', callback_data='date:{}'.format(second_date.strftime('%d.%m.%Y')))
     else:
