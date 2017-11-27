@@ -266,8 +266,7 @@ def order_handler(bot, update):
 
     elif update.callback_query.data == 'apply':
         try:
-            # ecoline.checkout(order_properties)
-            pass
+            ecoline.checkout(order_properties)
         except Exception as exc:
             error(bot, update, exc)
             bot.editMessageText(
