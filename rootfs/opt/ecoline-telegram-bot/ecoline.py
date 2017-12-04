@@ -220,14 +220,14 @@ class Ecoline(object):
         basket = self.get_basket()
         if basket:
             try:
-                requests.request('POST', '{}/order/make.php'.format(self.base_url), data=properties, cookies=self.cookies, headers=headers)
+                r = requests.request('POST', '{}/order/make.php'.format(self.base_url), data=properties, cookies=self.cookies, headers=headers)
             except Exception as exc:
                 raise EcolineTransportException(exc)
             else:
                 self.logger.debug('Checkout operation request success. Request data: {0}. Reply data: [{1}] Headers: {2} Message: {3}'.format(properties,
-                                                                                                                                              requests.status_code,
-                                                                                                                                              requests.headers,
-                                                                                                                                              requests.text))
+                                                                                                                                              r.status_code,
+                                                                                                                                              r.headers,
+                                                                                                                                              r.text))
 
     def logout(self):
         try:
