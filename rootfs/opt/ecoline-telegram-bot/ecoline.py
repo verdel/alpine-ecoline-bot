@@ -74,7 +74,7 @@ class Ecoline(object):
 
     def __get_product_id(self, name=''):
         if name:
-            headers = {'referer': 'https://www.ecoline-komi.ru/order/1/'}
+            headers = {'referer': '{}/order/1/'.format(self.base_url)}
             try:
                 products = requests.request('GET', '{}/order/1/'.format(self.base_url), cookies=self.cookies, headers=headers)
             except Exception as exc:
@@ -131,7 +131,7 @@ class Ecoline(object):
             return False
 
     def get_basket(self):
-        headers = {'referer': 'https://www.ecoline-komi.ru/order/make.php'}
+        headers = {'referer': '{}/order/make.php'.format(self.base_url)}
         result = []
         try:
             html = requests.request('GET', '{}/order/make.php'.format(self.base_url), cookies=self.cookies, headers=headers)
@@ -156,7 +156,7 @@ class Ecoline(object):
                 return False
 
     def get_basket_cost(self):
-        headers = {'referer': 'https://www.ecoline-komi.ru/order/make.php'}
+        headers = {'referer': '{}/order/make.php'.format(self.base_url)}
         try:
             html = requests.request('GET', '{}/order/make.php'.format(self.base_url), cookies=self.cookies, headers=headers)
         except Exception as exc:
@@ -173,7 +173,7 @@ class Ecoline(object):
                 False
 
     def get_order_properties(self):
-        headers = {'referer': 'https://www.ecoline-komi.ru/order/make.php'}
+        headers = {'referer': '{}/order/make.php'.format(self.base_url)}
         result = {}
         properties = ['ORDER_PROP_1',
                       'ORDER_PROP_2',
@@ -192,7 +192,7 @@ class Ecoline(object):
         return result
 
     def clear_basket(self):
-        headers = {'referer': 'https://www.ecoline-komi.ru/order/make.php'}
+        headers = {'referer': '{}/order/make.php'.format(self.base_url)}
         basket = self.get_basket()
         if basket:
             for item in basket:
@@ -207,7 +207,7 @@ class Ecoline(object):
             return True
 
     def add_to_basket(self, name='', quantity=1):
-        headers = {'referer': 'https://www.ecoline-komi.ru/order/1/'}
+        headers = {'referer': '{}/order/1/'.format(self.base_url)}
         id = self.__get_product_id(name)
         if id:
             try:
@@ -216,7 +216,7 @@ class Ecoline(object):
                 raise EcolineTransportException(exc)
 
     def checkout(self, properties={}):
-        headers = {'referer': 'https://www.ecoline-komi.ru/order/make.php'}
+        headers = {'referer': '{}/order/make.php'.format(self.base_url)}
         basket = self.get_basket()
         if basket:
             try:
@@ -224,10 +224,10 @@ class Ecoline(object):
             except Exception as exc:
                 raise EcolineTransportException(exc)
             else:
-                self.logger.debug('Checkout operation request success. Request data: {0}. Reply data: [{1}] Headers: {2} Message: {3}'.format(properties,
-                                                                                                                                              r.status_code,
-                                                                                                                                              r.headers,
-                                                                                                                                              r.text))
+                self.logger.debug(u'Checkout operation request success. Request data: {0}. Reply data: [{1}] Headers: {2} Message: {3}'.format(properties,
+                                                                                                                                               r.status_code,
+                                                                                                                                               r.headers,
+                                                                                                                                               r.text))
 
     def logout(self):
         try:
