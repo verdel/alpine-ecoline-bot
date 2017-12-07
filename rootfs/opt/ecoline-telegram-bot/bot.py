@@ -301,13 +301,13 @@ def order_handler(bot, update):
                                                                order_date,
                                                                order_time,
                                                                order_pay,
-                                                               update.callback_query.from_user.username,
+                                                               update.callback_query.from_user.first_name,
                                                                update.callback_query.from_user.id))
             history.close()
             logger.info(u'Order request: [Date: {0}, Time: {1}, Pay: {2}] from user {3}, id {4} complete success'.format(order_date,
                                                                                                                          order_time,
                                                                                                                          order_pay.decode('utf-8'),
-                                                                                                                         update.callback_query.from_user.username,
+                                                                                                                         update.callback_query.from_user.first_name,
                                                                                                                          update.callback_query.from_user.id))
 
 
@@ -372,7 +372,7 @@ def bonus(bot, update):
                 chat_id=update.message.chat_id,
                 text=u'Бонусный баланс: {}'.format(int(bonus))
             )
-            logger.info('Bonus request from user {}, id {} complete success'.format(update.message.from_user.username,
+            logger.info('Bonus request from user {}, id {} complete success'.format(update.message.from_user.first_name,
                                                                                     update.message.from_user.id))
 
 
@@ -403,7 +403,7 @@ def history(bot, update):
                     chat_id=update.message.chat_id,
                     text=u'Информация от бота:\r\nПредыдущий заказ был сделан: {} {}\r\nЗаказ на дату: {}\r\nЗаказ на время: {}\r\nОплата: {}\r\nПользователь: {} (id: {})\r\nПрошло дней: {}'''.format(*history_item)
                 )
-            logger.info('History request from user {}, id {} complete success'.format(update.message.from_user.username,
+            logger.info('History request from user {}, id {} complete success'.format(update.message.from_user.first_name,
                                                                                       update.message.from_user.id))
 
 
