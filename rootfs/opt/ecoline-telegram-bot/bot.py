@@ -145,7 +145,8 @@ def make_date_keyboard():
 def make_time_keyboard():
     if datetime.today().date().strftime('%d.%m.%Y') == order_properties['ORDER_PROP_6']:
         tm = sanitaize_time_periods(time_periods)
-
+    else:
+        tm = time_periods
     time = OrderedDict(sorted(tm.items(), key=lambda t: t[0]))
 
     count = 1
