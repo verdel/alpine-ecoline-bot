@@ -77,13 +77,26 @@ def restricted(func):
     @wraps(func)
     def wrapped(bot, update, *args, **kwargs):
         user_id = update.effective_user.id
-        if user_id not in cfg['telegram']['allow_user']:
+        chat_id = update.effective_chat.id
+        
+        if cfg['telegram']['allow_chat']:
+            allowed_group = chat_id in cfg['telegram']['allow_chat']
+        else:
+            allowed_group = False
+        
+        if cfg['telegram']['allow_user']:
+            allowed_user = user_id in cfg['telegram']['allow_user']
+        else:
+            allowed_user = False
+        
+        if allowed_user or allowed_group:
+            return func(bot, update, *args, **kwargs)
+        else:
             bot.sendMessage(
                 chat_id=update.message.chat_id,
-                text=u'Ой! Вы не авторизованы для этого типа запросов.'
+                text=u'Ой! Вы не авторизованы для работы с ботом.'
             )
             return
-        return func(bot, update, *args, **kwargs)
     return wrapped
 
 
@@ -148,7 +161,6 @@ def make_time_keyboard():
     else:
         tm = time_periods
     time = OrderedDict(sorted(tm.items(), key=lambda t: t[0]))
-
     count = 1
     keyboard_array = []
     line_array = []
@@ -160,6 +172,7 @@ def make_time_keyboard():
         else:
             line_array.append(InlineKeyboardButton(v, callback_data='time:{}'.format(k)))
         count += 1
+
     keyboard_array.append([InlineKeyboardButton('Отменить заказ', callback_data='cancel')])
     keyboard_array = InlineKeyboardMarkup(keyboard_array)
     return keyboard_array
