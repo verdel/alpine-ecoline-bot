@@ -6,6 +6,8 @@ COPY rootfs /
 RUN apk --no-cache --update add \
     bash \
     py-pip \
+    py-cffi \
+    py-cryptography \
     && pip install --upgrade pip \
     && pip install -r /opt/ecoline-telegram-bot/requirements.txt \
     # Clean up
