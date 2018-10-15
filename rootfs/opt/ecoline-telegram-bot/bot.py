@@ -241,7 +241,7 @@ def order_handler(bot, update):
         else:
             try:
                 bonus = int(ecoline.get_bonus())
-                cost = int(ecoline.get_basket_cost().replace(' руб.', ''))
+                cost = int(unicode(ecoline.get_basket_cost()).replace(u' руб.', u''))
             except Exception as exc:
                 logger.error('Pay error "%s"' % exc)
                 order_properties['PAY_SYSTEM_ID'] = 1
