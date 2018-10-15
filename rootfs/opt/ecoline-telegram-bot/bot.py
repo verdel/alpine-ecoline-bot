@@ -411,7 +411,7 @@ def history(bot, update):
             except:
                 history = open('order.log', 'r')
             history_item = history.readline().split(';')
-            if history_item:
+            if history_item and history_item[0] != '':
                 history_item.append((datetime.now() - datetime.strptime(history_item[0], '%d.%m.%Y')).days)
                 history_item[4] = history_item[4].decode('utf-8')
                 bot.sendMessage(
