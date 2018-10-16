@@ -259,6 +259,14 @@ def order_handler(bot, update):
                         text=update.callback_query.message.text + u'\r\nВремя доставки: {}'.format(time_periods[time_id]),
                         reply_markup=make_pay_keyboard()
                     )
+                else:
+                    order_properties['PAY_SYSTEM_ID'] = 1
+                    bot.editMessageText(
+                    message_id=update.callback_query.message.message_id,
+                    chat_id=update.callback_query.message.chat.id,
+                    text=update.callback_query.message.text + u'\r\nВремя доставки: {}\r\nОплата: Наличными'.format(time_periods[time_id]),
+                    reply_markup=make_apply_keyboard()
+                    )
 
     elif re.match('^pay:\d{1}', update.callback_query.data):
         pay_id = int(re.search('^pay:(\d{1})', update.callback_query.data).group(1))
