@@ -122,7 +122,7 @@ class Ecoline(object):
         except Exception as exc:
             raise EcolineTransportException(exc)
 
-        orders_date = re.findall(u'\<td\>(\d+\.\d+\.\d+)\</td\>', profile.text, re.DOTALL)
+        orders_date = re.findall(u'\<td\>(\d+\.\d+\.\d+).*\</td\>', profile.text, re.DOTALL)
         if orders_date:
             days = (datetime.datetime.now() - datetime.datetime.strptime(orders_date[0], '%d.%m.%Y')).days
             result.update({'date': orders_date[0], 'diff': days})
