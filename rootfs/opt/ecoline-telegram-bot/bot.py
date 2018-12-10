@@ -78,17 +78,17 @@ def restricted(func):
     def wrapped(bot, update, *args, **kwargs):
         user_id = update.effective_user.id
         chat_id = update.effective_chat.id
-        
+
         if cfg['telegram']['allow_chat']:
             allowed_group = chat_id in cfg['telegram']['allow_chat']
         else:
             allowed_group = False
-        
+
         if cfg['telegram']['allow_user']:
             allowed_user = user_id in cfg['telegram']['allow_user']
         else:
             allowed_user = False
-        
+
         if allowed_user or allowed_group:
             return func(bot, update, *args, **kwargs)
         else:
@@ -261,12 +261,11 @@ def order_handler(bot, update):
                     )
                 else:
                     order_properties['PAY_SYSTEM_ID'] = 1
-                    bot.editMessageText(
-                    message_id=update.callback_query.message.message_id,
-                    chat_id=update.callback_query.message.chat.id,
-                    text=update.callback_query.message.text + u'\r\nВремя доставки: {}\r\nОплата: Наличными'.format(time_periods[time_id]),
-                    reply_markup=make_apply_keyboard()
-                    )
+                    bot.editMessageText(message_id=update.callback_query.message.message_id,
+                                        chat_id=update.callback_query.message.chat.id,
+                                        text=update.callback_query.message.text + u'\r\nВремя доставки: {}\r\nОплата: Наличными'.format(time_periods[time_id]),
+                                        reply_markup=make_apply_keyboard()
+                                        )
 
     elif re.match('^pay:\d{1}', update.callback_query.data):
         pay_id = int(re.search('^pay:(\d{1})', update.callback_query.data).group(1))
@@ -289,7 +288,7 @@ def order_handler(bot, update):
 
     elif update.callback_query.data == 'apply':
         try:
-            ecoline.checkout(order_properties)
+            order_status = ecoline.checkout(order_properties)
         except Exception as exc:
             error(bot, update, exc)
             bot.editMessageText(
@@ -303,12 +302,28 @@ def order_handler(bot, update):
             except Exception as exc:
                 error(bot, update, exc)
         else:
-            bot.editMessageText(
-                message_id=update.callback_query.message.message_id,
-                chat_id=update.callback_query.message.chat.id,
-                text=update.callback_query.message.text + u'\r\nСтатус заказа: {}'.format(emojize(':white_check_mark:', use_aliases=True)),
-                reply_markup=False
-            )
+            if order_status['status'] == 'ok' and order_status['properties'] == 'ok':
+                bot.editMessageText(
+                    message_id=update.callback_query.message.message_id,
+                    chat_id=update.callback_query.message.chat.id,
+                    text=update.callback_query.message.text + u'\r\nСтатус заказа: {}'.format(emojize(':white_check_mark:', use_aliases=True)),
+                    reply_markup=False
+                )
+            elif order_status['status'] == 'error':
+                bot.editMessageText(
+                    message_id=update.callback_query.message.message_id,
+                    chat_id=update.callback_query.message.chat.id,
+                    text=update.callback_query.message.text + u'\r\nСтатус заказа: {}'.format(emojize(':no_entry:', use_aliases=True)),
+                    reply_markup=False
+                )
+            elif order_status['status'] == 'ok' and order_status['properties'] == 'error':
+                bot.editMessageText(
+                    message_id=update.callback_query.message.message_id,
+                    chat_id=update.callback_query.message.chat.id,
+                    text=update.callback_query.message.text + u'\r\nСтатус заказа: {} {}'.format(emojize(':rotating_light:', use_aliases=True), 'Заказ принят. Ошибка в выборе товара.'),
+                    reply_markup=False
+                )
+
             try:
                 history = open(cfg['common']['history_path'], 'w')
             except:
@@ -327,11 +342,13 @@ def order_handler(bot, update):
                                                                update.callback_query.from_user.first_name,
                                                                update.callback_query.from_user.id))
             history.close()
-            logger.info(u'Order request: [Date: {0}, Time: {1}, Pay: {2}] from user {3}, id {4} complete success'.format(order_date,
-                                                                                                                         order_time,
-                                                                                                                         order_pay.decode('utf-8'),
-                                                                                                                         update.callback_query.from_user.first_name,
-                                                                                                                         update.callback_query.from_user.id))
+            logger.info(u'Order request: [Date: {0}, Time: {1}, Pay: {2}] from user {3}, id {4}, order status {5}, properties status: {6}'.format(order_date,
+                                                                                                                                                  order_time,
+                                                                                                                                                  order_pay.decode('utf-8'),
+                                                                                                                                                  update.callback_query.from_user.first_name,
+                                                                                                                                                  update.callback_query.from_user.id,
+                                                                                                                                                  order_status['status'],
+                                                                                                                                                  order_status['properties']))
 
 
 def message_handler(bot, update):

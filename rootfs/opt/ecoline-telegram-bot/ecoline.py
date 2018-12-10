@@ -92,6 +92,25 @@ class Ecoline(object):
         else:
             raise EcolineCommonException('Empty attribute "name" in __get_product_id() method')
 
+    def __check_order_status(self, order_result):
+        parser = BeautifulSoup(order_result.text, 'html.parser')
+        try:
+            order_status = parser.find('div', class_='alert-success').h1.text
+        except Exception as exc:
+            raise EcolineTransportException(exc)
+        else:
+            if order_status == u'Ваш заказ принят':
+                order_table = parser.find('table', class_='table')
+                order_property = order_table.find_all('tr')[1].find_all('td')
+                if order_property[0].text == self.name and int(order_property[1].text) == self.quantity:
+                    result = {'status': 'ok', 'properties': 'ok'}
+                else:
+                    result = {'status': 'ok', 'properties': 'error'}
+            else:
+                result = {'status': 'error', 'properties': 'error'}
+
+            return result
+
     def check_auth(self):
         try:
             html = requests.request('GET', '{}'.format(self.base_url), cookies=self.cookies)
@@ -208,10 +227,12 @@ class Ecoline(object):
 
     def add_to_basket(self, name='', quantity=1):
         headers = {'referer': '{}/order/1/'.format(self.base_url)}
-        id = self.__get_product_id(name)
+        self.name = name
+        self.quantity = int(quantity)
+        id = self.__get_product_id(self.name)
         if id:
             try:
-                requests.request('GET', '{}/order/1/?action=ADD2BASKET&id={}&quantity={}&prop[0]=0'.format(self.base_url, id, int(quantity)), cookies=self.cookies, headers=headers)
+                requests.request('GET', '{}/order/1/?action=ADD2BASKET&id={}&quantity={}&prop[0]=0'.format(self.base_url, id, self.quantity), cookies=self.cookies, headers=headers)
             except Exception as exc:
                 raise EcolineTransportException(exc)
 
@@ -228,6 +249,12 @@ class Ecoline(object):
                                                                                                                                                r.status_code,
                                                                                                                                                r.headers,
                                                                                                                                                r.text))
+            try:
+                order_status = self.__check_order_status(r)
+            except Exception as exc:
+                raise EcolineTransportException(exc)
+            else:
+                return order_status
 
     def logout(self):
         try:
