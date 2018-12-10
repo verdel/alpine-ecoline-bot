@@ -449,7 +449,6 @@ def history(bot, update):
 
 @restricted
 def order(bot, update):
-    history(bot, update)
     bot.sendChatAction(update.message.chat_id, action=ChatAction.TYPING)
     try:
         global ecoline
